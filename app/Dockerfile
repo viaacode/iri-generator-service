@@ -11,7 +11,7 @@ RUN if [ "$ENV" = "test" ]; then \
     pip install --user --no-cache-dir -r requirements-dev.txt; \
     fi;
 
-FROM python:3.10-slim AS production
+FROM python:3.11-slim AS production
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED=1

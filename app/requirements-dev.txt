@@ -1,0 +1,11 @@
+#./app/requirements-dev.txt
+# formatting
+ruff
+black
+isort
+
+# testing
+httpx
+pytest
+pytest-asyncio
+pytest-timeout

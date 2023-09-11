@@ -1,0 +1,10 @@
+# ./app/requirements.txt
+fastapi
+pydantic
+uvicorn[standard]
+sqlmodel
+gunicorn
+asyncpg
+SQLAlchemy
+uuid7
+pyyaml==5.3.1

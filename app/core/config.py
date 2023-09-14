@@ -5,7 +5,7 @@ from pydantic import BaseSettings, Field, PostgresDsn, validator
 
 class Settings(BaseSettings):
     VERSION: str = Field("0.0.1")
-    PROJECT_NAME: str = Field("Ultimate FastAPI Project Setup")
+    PROJECT_NAME: str = Field("Noid-based IRI generator")
     POSTGRES_USER: str = Field("postgres", env="POSTGRES_USER")
     POSTGRES_PASSWORD: str = Field("postgres", env="POSTGRES_PASSWORD")
     POSTGRES_DB: str = Field("postgres", env="POSTGRES_DB")
@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     POSTGRES_ECHO: bool = Field(False, env="POSTGRES_ECHO")
     POSTGRES_POOL_SIZE: int = Field(10, env="POSTGRES_POOL_SIZE")
     ASYNC_POSTGRES_URI: PostgresDsn | None
+    NOID_SCHEME: str | None = Field('', env="NOID_SCHEME")
+    NOID_TEMPLATE: str = Field("zedededek",env="NOID_TEMPLATE")
 
     class Config:
         case_sensitive = True

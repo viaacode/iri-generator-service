@@ -14,8 +14,8 @@ class Settings(BaseSettings):
     POSTGRES_ECHO: bool = Field(False, env="POSTGRES_ECHO")
     POSTGRES_POOL_SIZE: int = Field(10, env="POSTGRES_POOL_SIZE")
     ASYNC_POSTGRES_URI: PostgresDsn | None
-    NOID_SCHEME: str | None = Field('', env="NOID_SCHEME")
-    NOID_TEMPLATE: str = Field("zedededek",env="NOID_TEMPLATE")
+    NOID_SCHEME: str | None = Field("", env="NOID_SCHEME")
+    NOID_TEMPLATE: str = Field("zedededek", env="NOID_TEMPLATE")
 
     class Config:
         case_sensitive = True

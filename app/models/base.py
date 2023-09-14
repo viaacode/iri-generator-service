@@ -1,7 +1,8 @@
-from sqlmodel import SQLModel, Field
-from uuid import UUID
-from uuid_extensions import uuid7
 from datetime import datetime
+from uuid import UUID
+
+from sqlmodel import Field, SQLModel
+from uuid_extensions import uuid7
 
 
 class IdMixin(SQLModel):
@@ -22,4 +23,3 @@ class TimestampMixin(SQLModel):
 
 class DeleteResponse(SQLModel):
     deleted: int
-

@@ -1,5 +1,5 @@
-from noid import mint
 from core.config import settings
+from noid import mint
 
 
 def mint_new_noid(n: int, naa: str = None):

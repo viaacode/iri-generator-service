@@ -1,7 +1,7 @@
 from api.routes import router as api_router
 from core.config import settings
-from db.utils import create_db_and_tables
 from db.session import engine
+from db.utils import create_db_and_tables
 from fastapi import FastAPI
 
 

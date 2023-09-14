@@ -1,9 +1,9 @@
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import select, delete
 from uuid import UUID
 
 from models.minter import Minter
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel import delete, select
 
 
 async def create_minter(session: AsyncSession, naa: str) -> Minter:

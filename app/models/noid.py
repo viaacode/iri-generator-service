@@ -1,7 +1,5 @@
-
-from sqlmodel import SQLModel
-
 from models.base import IdMixin, TimestampMixin
+from sqlmodel import SQLModel
 
 
 class NoidBase(SQLModel):
@@ -11,6 +9,7 @@ class NoidBase(SQLModel):
 
 class NoidCreate(NoidBase):
     ...
+
 
 class NoidUpdate(NoidBase):
     noid: str = None
@@ -23,4 +22,3 @@ class Noid(IdMixin, TimestampMixin, NoidBase, table=True):
 
 class NoidResponse(Noid, table=False):
     ...
-    

@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     ASYNC_POSTGRES_URI: PostgresDsn | None
     NOID_SCHEME: str | None = Field("", env="NOID_SCHEME")
     NOID_TEMPLATE: str = Field("zedededek", env="NOID_TEMPLATE")
+    NOID_NAA: str = Field("", env="NOID_NAA")
 
     class Config:
         case_sensitive = True

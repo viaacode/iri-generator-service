@@ -5,7 +5,7 @@ uvicorn[standard]
 sqlmodel
 gunicorn
 asyncpg
-SQLAlchemy
+sqlalchemy<=1.4.35
 uuid7
 pyyaml==5.3.1
 noid

@@ -1,25 +1,46 @@
-# from uuid_extensions import uuid7
-# from sqlalchemy.ext.asyncio import AsyncSession
-# from fastapi import HTTPException
-# from models.iri import IRICreate, IRIUpdate
-# from crud.iri import (
-#     create_iri,
-#     get_iri,
-#     get_iri_by_key,
-#     update_iri,
-#     delete_iri,
-# )
+from uuid_extensions import uuid7
+from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import HTTPException
+from app.crud.minter import create_minter
+from app.models.minter import MinterCreate
+from models.noid import MintRequest, NoidCreate
+from crud.noid import get_noid, get_noid_by_binding, mint_noids
+from noid import mint as mint_noid
 
 
-# async def test_create_iri(session: AsyncSession):
-#     iri = IRICreate(key="123456")
-#     created_iri = await create_iri(session, iri)
-#     assert created_iri.id is not None
-#     assert created_iri.key == iri.key
-#     assert created_iri.noid == iri.noid
-#     assert created_iri.created_at is not None
-#     assert created_iri.updated_at is not None
+async def test_mint_noids(session: AsyncSession):
+    minter = MinterCreate(naa="naa", template="template", scheme="scheme")
+    created_minter = await create_minter(session, minter)
 
+    noid = NoidCreate(
+        noid=mint_noid(
+            n=minter.last_n,
+            template=minter.template,
+            scheme=minter.scheme,
+            naa=minter.naa,
+        ),
+        binding="test"
+    )
+
+    created_noid = await mint_noids(session, db_minter=created_minter, mint=MintRequest(bindings="test"))
+    await len(created_noid.noids) == 1
+    assert created_noid.noids[0].binding == noid.binding
+    assert created_noid.noids[0].noid == noid.noid
+    assert created_noid.noids[0].created_at is not None
+    assert created_noid.noids[0].updated_at is not None
+
+
+# def test_get_noid():
+#     n = 0
+#     assert mint_new_noid(n=n) == '00000000'
+#     n = n+1
+#     assert mint_new_noid(n=n) == '00000017'
+
+# def test_get_noid_with_naa():
+#     n = 0
+#     assert mint_new_noid(n=n, naa='id') == 'id/00000000'
+#     n = n+1
+#     assert mint_new_noid(n=n, naa='id') == 'id/00000017'
 
 # async def test_create_duplicate_iri(session: AsyncSession):
 #     iri = IRICreate(key="123456")

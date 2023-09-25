@@ -12,11 +12,8 @@ async def create_minter(session: AsyncSession, minter: MinterCreate) -> Minter:
     db_minter = Minter(**minter.dict())
     try:
         session.add(db_minter)
-        print('1')
         await session.commit()
-        print('2')
         await session.refresh(db_minter)
-        print('3')
         return db_minter
     except IntegrityError:
         await session.rollback()

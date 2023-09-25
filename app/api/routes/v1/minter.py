@@ -20,8 +20,8 @@ router = APIRouter(
     status_code=status.HTTP_201_CREATED,
     response_model=MinterResponse,
 )
-async def post_minter_route(minter: MinterCreate, db: AsyncSession = Depends(get_session)):
-    return await create_minter(db, minter)
+async def post_minter_route(minter: MinterCreate = MinterCreate(), db: AsyncSession = Depends(get_session)):
+    return await create_minter(session=db, minter=minter)
 
 # GET /minters
 @router.get(
@@ -31,7 +31,7 @@ async def post_minter_route(minter: MinterCreate, db: AsyncSession = Depends(get
     response_model=List[MinterResponse],
 )
 async def get_minters_route(db: AsyncSession = Depends(get_session)):
-    return await get_minters(db)
+    return await get_minters(session=db)
 
 # GET /minters/{id}
 @router.get(
@@ -41,7 +41,7 @@ async def get_minters_route(db: AsyncSession = Depends(get_session)):
     response_model=MinterResponse,
 )
 async def get_minter_route(id: UUID, db: AsyncSession = Depends(get_session)):
-    minter = await get_minter(db, id=id)
+    minter = await get_minter(session=db, id=id)
     if minter is None:
         raise HTTPException(
             status_code=404,

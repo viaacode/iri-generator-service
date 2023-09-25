@@ -31,6 +31,8 @@ class NoidUpdate(NoidBase):
 class Noid(TimestampMixin, NoidBase, table=True):
     __tablename__ = "noids"
 
+class NoidResponse(Minter, table=False):
+    ...
 
 class MintRequest(BaseModel):
     bindings: str | List[str] = []

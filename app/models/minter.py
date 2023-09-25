@@ -4,9 +4,9 @@ from sqlmodel import SQLModel
 
 
 class MinterBase(SQLModel):
-    scheme: str = (settings.NOID_SCHEME,)
-    naa: str = (settings.NOID_NAA,)
-    template: str = (settings.NOID_TEMPLATE,)
+    scheme: str = settings.NOID_SCHEME
+    naa: str = settings.NOID_NAA
+    template: str = settings.NOID_TEMPLATE
     last_n: int = 0
 
 
@@ -23,3 +23,6 @@ class MinterUpdate(MinterBase):
 
 class Minter(IdMixin, TimestampMixin, MinterBase, table=True):
     __tablename__ = "minters"
+
+class MinterResponse(Minter, table=False):
+    ...

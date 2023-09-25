@@ -3,7 +3,7 @@ from core.config import settings
 from db.session import engine
 from db.utils import create_db_and_tables
 from fastapi import FastAPI
-
+import uvicorn
 
 def get_application():
     app = FastAPI(
@@ -16,7 +16,6 @@ def get_application():
 
 
 app = get_application()
-
 
 @app.on_event("startup")
 async def on_startup():
@@ -31,3 +30,6 @@ async def health():
         status="OK",
         message="Visit /docs for more information.",
     )
+
+# if __name__ == "__main__":
+#     uvicorn.run("main:app", host="0.0.0.0", port=8001)

@@ -20,6 +20,7 @@ router = APIRouter(
     response_model=List[Noid],
 )
 async def post_noid_route(id: UUID, count: int  = 1, db: AsyncSession = Depends(get_session)):
+    print('here!')
     db_minter = await get_minter(db, id=id)
     return await create_noids(session=db, db_minter=db_minter, count=count)
 

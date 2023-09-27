@@ -1,4 +1,6 @@
 import pytest_asyncio
+from crud.minter import create_minter
+from models.minter import MinterCreate
 from db.session import get_session
 from fastapi import FastAPI
 from httpx import AsyncClient

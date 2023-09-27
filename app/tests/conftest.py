@@ -3,6 +3,8 @@ import asyncio
 import pytest
 import pytest_asyncio
 from core.config import settings
+from crud.minter import create_minter
+from models.minter import MinterCreate
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlmodel import SQLModel
@@ -54,3 +56,8 @@ async def session(engine):
             if nested_tsx.is_active:
                 await nested_tsx.rollback()
             await tsx.rollback()
+
+
+@pytest_asyncio.fixture()
+async def minter(session):
+    return await create_minter(session, MinterCreate(naa="", template="zek", scheme=""))

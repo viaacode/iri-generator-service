@@ -1,47 +1,34 @@
 import pytest
-from api.routes.v1.mint import router as mint_router
+from api.routes.v1.noid import router as noid_router
+from crud.noid import create_noids
+from models.minter import MinterCreate
+from crud.minter import create_minter, get_minter
+from models.noid import NoidCreate
 from tests.routes.conftest import BaseTestRouter
-
+from core.config import settings
 
 @pytest.mark.asyncio
-class TestMintRouter(BaseTestRouter):
-    router = mint_router
+class TestNoidRouter(BaseTestRouter):
+    router = noid_router
 
-    async def test_mint_noid(self, client):
-        response = await client.post("/mint/")
+    async def test_create_noid(self, session, client):
+        minter = await create_minter(
+            session, MinterCreate(naa="naa", template="template", scheme="scheme")
+        )
+        response = await client.post(f"/minters/{minter.id}/noids/")
         assert response.status_code == 201
-        assert len(response.json()["noids"]) == 1
-        assert response.json()["noids"][0]["noid"] == "00000000"
-        assert response.json()["noids"][0]["key"] is None
 
-        response2 = await client.post("/mint/")
-        assert response2.status_code == 201
-        assert len(response2.json()["noids"]) == 1
-        assert response2.json()["noids"][0]["noid"] != response.json()["noids"][0]["noid"]
-        assert response2.json()["noids"][0]["key"] is None
+        assert response.json()["naa"] == settings.NOID_NAA
+        assert response.json()["scheme"] == settings.NOID_SCHEME
+        assert response.json()["template"] == settings.NOID_TEMPLATE
 
-    async def test_mint_noid_with_count(self, session, client):
-        response = await client.post("/mint/?count=10")
-        assert response.status_code == 201
-        assert len(response.json()["noids"]) == 10
-        assert response.json()["noids"][0]["noid"] == "00000000"
-        assert response.json()["noids"][0]["key"] is None
-
-    async def test_mint_noid_with_bind(self, session, client):
-        response = await client.post("/mint/?bind=test")
-        assert response.status_code == 201
-        assert len(response.json()["noids"]) == 1
-
-        noid1 = response.json()["noids"][0]
-
-        assert noid1["noid"] == "00000000"
-        assert noid1["key"] == "test"
-
-        response2 = await client.post("/mint/?bind=test")
-        noid2 = response2.json()["noids"][0]
-        assert noid1["noid"] == noid2["noid"]
-        assert noid1["key"] == noid2["key"]
-
-    async def test_mint_noid_with_bind_and_invalid_count(self, session, client):
-        response = await client.post("/mint/?bind=test&count=2")
-        assert response.status_code == 400
+    async def test_get_noid(self, session, client):
+        minter = await create_minter(
+            session, MinterCreate(naa="naa", template="template", scheme="scheme")
+        )
+        noid = await create_noids(session, minter)
+        response = await client.get(f"/minters/{minter.id}/noids/{noid[0].noid}")
+        assert response.status_code == 200
+        assert response.json()["naa"] == minter.naa
+        assert response.json()["scheme"] == minter.scheme
+        assert response.json()["template"] == minter.template

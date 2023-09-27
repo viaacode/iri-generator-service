@@ -1,11 +1,13 @@
 from core.config import settings
 from models.base import IdMixin, TimestampMixin
 from sqlmodel import SQLModel
+
 # import traceback
 
 # print('check')
 # for line in traceback.format_stack():
 #         print(line.strip())
+
 
 class MinterBase(SQLModel):
     scheme: str = settings.NOID_SCHEME
@@ -27,6 +29,7 @@ class MinterUpdate(MinterBase):
 
 class Minter(IdMixin, TimestampMixin, MinterBase, table=True):
     __tablename__ = "minters"
+
 
 class MinterResponse(Minter, table=False):
     ...

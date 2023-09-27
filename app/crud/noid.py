@@ -29,8 +29,8 @@ async def create_noids(
             )
             session.add(db_noid)
             db_noids.append(db_noid)
-        # 3. update minter
-        db_minter.last_n = n
+            # 3. update minter
+            db_minter.last_n = n + 1
         session.add(db_minter)
         await session.commit()
         return db_noids

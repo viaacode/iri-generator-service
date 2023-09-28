@@ -1,10 +1,8 @@
-from uuid_extensions import uuid7
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
-from crud.minter import create_minter
-from models.minter import Minter, MinterCreate
-from models.noid import MintRequest, NoidCreate
-from crud.noid import get_noid, get_noid_by_binding, create_noids
+from models.minter import Minter
+from models.noid import NoidCreate
+from crud.noid import create_and_bind_noids, get_noid, get_noid_binding, get_noid_by_binding, create_noids, delete_noid_binding, update_noid_binding
 from noid import mint as mint_noid
 
 
@@ -59,14 +57,15 @@ def test_mint_noid_with_naa():
     n = n+1
     assert mint_noid(n=n, naa='id') == 'id/11'
 
-# async def test_create_duplicate_iri(session: AsyncSession):
-#     iri = IRICreate(key="123456")
-#     await create_iri(session, iri)
-#     try:
-#         await create_iri(session, iri)
-#     except HTTPException as e:
-#         assert e.status_code == 409
-#         assert e.detail == "iri already exists"
+async def test_create_duplicate_noid(session: AsyncSession, minter: Minter):
+    n = minter.last_n
+    await create_noids(session, db_minter=minter)
+    try:
+        minter.last_n = n
+        await create_noids(session, db_minter=minter)
+    except HTTPException as e:
+        assert e.status_code == 409
+        assert e.detail == "noid already exists"
 
 
 # async def test_get_iri(session: AsyncSession):
@@ -81,44 +80,51 @@ def test_mint_noid_with_naa():
 #     assert retrieved_iri is None
 
 
-# async def test_get_iri_by_key(session: AsyncSession):
-#     iri = IRICreate(key="123456")
-#     created_iri = await create_iri(session, iri)
-#     retrieved_iri = await get_iri_by_key(session, iri.key)
-#     assert retrieved_iri == created_iri
+async def test_get_noid_by_binding(session: AsyncSession, minter: Minter):
+    noid = NoidCreate(
+        noid=mint_noid(
+            n=minter.last_n,
+            template=minter.template,
+            scheme=minter.scheme,
+            naa=minter.naa,
+        ),
+        minter=minter,
+        minter_id=minter.id,
+        n=minter.last_n
+    )
+    created_noid, = await create_and_bind_noids(session, db_minter=minter, bindings='test')
+    retrieved_noid = await get_noid_by_binding(session, db_minter=minter, binding='test')
+    assert retrieved_noid == created_noid
 
 
-# async def test_get_nonexistent_iri_by_key(session: AsyncSession):
-#     retrieved_iri = await get_iri_by_key(session, "123456")
-#     assert retrieved_iri is None
+async def test_get_nonexistent_noid_by_binding(session: AsyncSession, minter: Minter):
+    retrieved_noid = await get_noid_by_binding(session, db_minter=minter, binding='test')
+    assert retrieved_noid is None
 
 
-# async def test_update_iri(session: AsyncSession):
-#     created_iri = await create_iri(
-#         session, IRICreate(namespace="http://example.org/", key="123456")
-#     )
-#     updated_iri = await update_iri(
-#         session, created_iri.id, IRIUpdate(namespace="http://example.org/")
-#     )
-#     assert updated_iri.id == created_iri.id
-#     assert updated_iri.key == "123456"
-#     assert updated_iri.namespace == "http://example.org/"
+async def test_update_noid_binding(session: AsyncSession, minter: Minter):
+    created_noid, = await create_noids(session, db_minter=minter)
+    binding = await update_noid_binding(session, db_minter=minter, noid=created_noid.noid, binding='test')
+    assert binding == 'test'
+    assert binding == created_noid.binding
 
 
-# async def test_update_nonexistent_iri(session: AsyncSession):
-#     try:
-#         await update_iri(session, uuid7(), IRIUpdate(namespace="http://example.org/"))
-#     except HTTPException as e:
-#         assert e.status_code == 404
-#         assert e.detail == "iri not found"
+async def test_update_binding_of_nonexistent_noid(session: AsyncSession, minter: Minter):
+    try:
+        await update_noid_binding(session, db_minter=minter, noid='test', binding='test')
+    except HTTPException as e:
+        assert e.status_code == 404
+        assert e.detail == "noid not found"
 
 
-# async def test_delete_iri(session: AsyncSession):
-#     created_iri = await create_iri(session, IRICreate(key="123456"))
-#     deleted_count = await delete_iri(session, created_iri.id)
-#     assert deleted_count == 1
-#     retrieved_iri = await get_iri(session, created_iri.id)
-#     assert retrieved_iri is None
+async def test_delete_noid_binding(session: AsyncSession, minter: Minter):
+    created_noid, = await create_and_bind_noids(session, db_minter=minter, bindings="test")
+    success = await delete_noid_binding(session, db_minter=minter, noid=created_noid.noid)
+    assert success
+    retrieved_noid = await get_noid_by_binding(session, db_minter=minter, binding="test")
+    assert retrieved_noid is None
+    retrieved_binding = await get_noid_binding(session, db_minter=minter, noid=created_noid.noid)
+    assert retrieved_binding is None
 
 
 # async def test_delete_nonexistent_iri(session: AsyncSession):

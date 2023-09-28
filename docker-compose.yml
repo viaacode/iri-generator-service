@@ -30,7 +30,7 @@ services:
   app-test:
     profiles: ["test"]
     <<: *app-base
-    command: sh -c "python -m pytest -s -vv"
+    command: sh -c "python -m pytest -s -vv --cov=app"
     build:
       context: ./app
       args:

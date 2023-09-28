@@ -1,5 +1,5 @@
 from typing import List
-from crud.noid import mint_noids
+from crud.noid import create_and_bind_noids
 from crud.minter import get_minter
 from db.session import get_session
 from fastapi import APIRouter, status, Depends, HTTPException
@@ -23,5 +23,5 @@ router = APIRouter(
 )
 async def post_mint_route(id: UUID, mint: MintRequest, db: AsyncSession = Depends(get_session)):
     db_minter = await get_minter(db, id=id)
-    return await mint_noids(session=db, db_minter=db_minter, mint=mint)
+    return await create_and_bind_noids(session=db, db_minter=db_minter, bindings=mint.bindings)
 

@@ -2,11 +2,25 @@ from typing import List
 
 from fastapi import HTTPException
 from models.minter import Minter
-from models.noid import MintRequest, Noid
+from models.noid import Noid
 from noid import mint as mint_noid
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import delete, select
+
+
+def mint_new_noid(db_minter: Minter, n: int, binding: str | None = None) -> Noid:
+    return Noid(
+        noid=mint_noid(
+            n=n,
+            template=db_minter.template,
+            scheme=db_minter.scheme,
+            naa=db_minter.naa,
+        ),
+        n=n,
+        binding=binding,
+        minter_id=db_minter.id,
+    )
 
 
 async def create_noids(
@@ -17,16 +31,7 @@ async def create_noids(
         db_noids = []
         for n in range(db_minter.last_n, db_minter.last_n + count):
             # Create new noid and store
-            db_noid = Noid(
-                noid=mint_noid(
-                    n=n,
-                    template=db_minter.template,
-                    scheme=db_minter.scheme,
-                    naa=db_minter.naa,
-                ),
-                n=n,
-                minter_id=db_minter.id,
-            )
+            db_noid = mint_new_noid(db_minter, n)
             session.add(db_noid)
             db_noids.append(db_noid)
             # 3. update minter
@@ -42,12 +47,45 @@ async def create_noids(
         )
 
 
-async def mint_noids(
-    session: AsyncSession, db_minter: Minter, mint: MintRequest
+async def update_noid_binding(
+    session: AsyncSession, db_minter: Minter, noid: str, binding: str
+) -> str:
+    db_noid: Noid = await get_noid(session=session, db_minter=db_minter, noid=noid)
+    if db_noid is None:
+        return None
+
+    db_noid.binding = binding
+    session.add(db_noid)
+    await session.commit()
+    await session.refresh(db_noid)
+    return binding
+
+
+async def delete_noid_binding(
+    session: AsyncSession, db_minter: Minter, noid: str
+) -> bool:
+    db_noid: Noid = await get_noid(session=session, db_minter=db_minter, noid=noid)
+    if db_noid is None:
+        return None
+
+    db_noid.binding = None
+    session.add(db_noid)
+    await session.commit()
+    await session.refresh(db_noid)
+    return True
+
+
+async def get_noid_binding(session: AsyncSession, db_minter: Minter, noid: str) -> str:
+    db_noid: Noid = await get_noid(session=session, db_minter=db_minter, noid=noid)
+    return db_noid.binding
+
+
+async def create_and_bind_noids(
+    session: AsyncSession, db_minter: Minter, bindings: str | List[str] = []
 ) -> List[Noid]:
     # 2. mint next noid
     try:
-        bindings = mint.bindings if isinstance(mint.bindings, list) else [mint.bindings]
+        bindings = bindings if isinstance(bindings, list) else [bindings]
         n = db_minter.last_n
         db_noids = []
         for binding in bindings:
@@ -57,17 +95,7 @@ async def mint_noids(
 
             if db_noid is None:
                 # Create new noid and store
-                db_noid = Noid(
-                    noid=mint_noid(
-                        n=n,
-                        template=db_minter.template,
-                        scheme=db_minter.scheme,
-                        naa=db_minter.naa,
-                    ),
-                    n=n,
-                    binding=binding,
-                    minter_id=db_minter.id,
-                )
+                db_noid = mint_new_noid(db_minter, n, binding=binding)
                 session.add(db_noid)
                 n = n + 1
             db_noids.append(db_noid)
@@ -76,7 +104,6 @@ async def mint_noids(
         db_minter.last_n = n
         session.add(db_minter)
         await session.commit()
-        print(db_noids)
         return db_noids
     except IntegrityError:
         await session.rollback()

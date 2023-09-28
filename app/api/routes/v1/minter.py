@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from models.minter import MinterCreate, MinterResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from uuid import UUID
-from api.routes.v1.mint import router as mint_router
+from api.routes.v1.bind import router as bind_router
 from api.routes.v1.noid import router as noid_router
 from typing import List
 
@@ -49,5 +49,5 @@ async def get_minter_route(id: UUID, db: AsyncSession = Depends(get_session)):
         )
     return minter
 
-router.include_router(mint_router, prefix="/{id}/mint")
+router.include_router(bind_router, prefix="/{id}/bind")
 router.include_router(noid_router, prefix="/{id}/noids")

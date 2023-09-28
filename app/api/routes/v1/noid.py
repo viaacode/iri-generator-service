@@ -1,4 +1,4 @@
-from crud.noid import update_noid_binding, create_noids, delete_noid_binding, get_noid_binding, get_noids, get_noid
+from crud.noid import (update_noid_binding, create_noids, delete_noid_binding, get_noid_binding, get_noids, get_noid)
 from crud.minter import get_minter
 from db.session import get_session
 from fastapi import APIRouter, HTTPException, status, Depends

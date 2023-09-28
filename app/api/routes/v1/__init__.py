@@ -3,7 +3,7 @@ from fastapi import APIRouter
 
 
 router = APIRouter(prefix="/v1")
-routes = ("minter","mint",)
+routes = ("minter",)
 for module_name in routes:
     api_module = import_module(f"api.routes.v1.{module_name}")
     api_module_router = api_module.router

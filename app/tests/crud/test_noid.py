@@ -2,14 +2,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import HTTPException
 from models.minter import Minter
 from models.noid import NoidCreate
-from crud.noid import create_and_bind_noids, get_noid, get_noid_binding, get_noid_by_binding, create_noids, delete_noid_binding, update_noid_binding
+from crud.noid import (create_and_bind_noids, get_noid, get_noid_binding, get_noid_by_binding, create_noids, delete_noid_binding, update_noid_binding, mint_new_noid)
 from noid import mint as mint_noid
 
 
 async def test_create_noids(session: AsyncSession, minter: Minter):
-    # minter = MinterCreate(naa="naa", template="template", scheme="scheme")
-    # created_minter = await create_minter(session, minter)
-
     noid = NoidCreate(
         noid=mint_noid(
             n=minter.last_n,
@@ -32,6 +29,45 @@ async def test_create_noids(session: AsyncSession, minter: Minter):
     next_noid, = await create_noids(session, db_minter=minter)
     assert created_noid.noid != next_noid.noid
 
+async def test_create_multiple_noids(session: AsyncSession, minter: Minter):
+    noid1 = NoidCreate(
+        noid=mint_noid(
+            n=minter.last_n,
+            template=minter.template,
+            scheme=minter.scheme,
+            naa=minter.naa,
+        ),
+        minter=minter,
+        minter_id=minter.id,
+        n=minter.last_n
+    )
+    noid2 = NoidCreate(
+        noid=mint_noid(
+            n=minter.last_n + 1,
+            template=minter.template,
+            scheme=minter.scheme,
+            naa=minter.naa,
+        ),
+        minter=minter,
+        minter_id=minter.id,
+        n=minter.last_n + 1
+    )
+    created_noids = await create_noids(session, db_minter=minter, count=2)
+    assert len(created_noids) == 2
+
+    assert created_noids[0].binding == noid1.binding
+    assert created_noids[0].noid == noid1.noid
+    assert created_noids[1].binding == noid2.binding
+    assert created_noids[1].noid == noid2.noid
+
+    assert created_noids[0].created_at != created_noids[1].created_at
+    assert created_noids[0].updated_at != created_noids[1].updated_at
+    assert created_noids[0].noid != created_noids[1].noid
+
+    next_noid, = await create_noids(session, db_minter=minter)
+    assert created_noids[0].noid != next_noid.noid
+    assert created_noids[1].noid != next_noid.noid
+
 async def test_get_noid(session: AsyncSession, minter: Minter):
     noid = mint_noid(
             n=minter.last_n,
@@ -43,7 +79,22 @@ async def test_get_noid(session: AsyncSession, minter: Minter):
     retrieved_noid = await get_noid(session, minter, created_noid.noid)
     assert retrieved_noid == created_noid
     assert retrieved_noid.noid == noid
-    
+
+async def test_mint_new_noid(session: AsyncSession, minter: Minter):
+    noid = mint_new_noid(minter, 0)
+    assert noid is not None
+    assert noid.binding is None
+    assert noid.noid == '00'
+    assert noid.created_at is not None
+    assert noid.updated_at is not None
+
+async def test_mint_new_noid_with_binding(session: AsyncSession, minter: Minter):
+    noid = mint_new_noid(minter, 1, 'test')
+    assert noid is not None
+    assert noid.binding == 'test'
+    assert noid.noid == '11'
+    assert noid.created_at is not None
+    assert noid.updated_at is not None
 
 def test_mint_noid():
     n = 0
@@ -66,18 +117,6 @@ async def test_create_duplicate_noid(session: AsyncSession, minter: Minter):
     except HTTPException as e:
         assert e.status_code == 409
         assert e.detail == "noid already exists"
-
-
-# async def test_get_iri(session: AsyncSession):
-#     iri = IRICreate(key="123456")
-#     created_iri = await create_iri(session, iri)
-#     retrieved_iri = await get_iri(session, created_iri.id)
-#     assert retrieved_iri == created_iri
-
-
-# async def test_get_nonexistent_iri(session: AsyncSession):
-#     retrieved_iri = await get_iri(session, uuid7())
-#     assert retrieved_iri is None
 
 
 async def test_get_noid_by_binding(session: AsyncSession, minter: Minter):
@@ -110,11 +149,8 @@ async def test_update_noid_binding(session: AsyncSession, minter: Minter):
 
 
 async def test_update_binding_of_nonexistent_noid(session: AsyncSession, minter: Minter):
-    try:
-        await update_noid_binding(session, db_minter=minter, noid='test', binding='test')
-    except HTTPException as e:
-        assert e.status_code == 404
-        assert e.detail == "noid not found"
+    binding = await update_noid_binding(session, db_minter=minter, noid='test', binding='test')
+    assert binding is None
 
 
 async def test_delete_noid_binding(session: AsyncSession, minter: Minter):
@@ -127,6 +163,6 @@ async def test_delete_noid_binding(session: AsyncSession, minter: Minter):
     assert retrieved_binding is None
 
 
-# async def test_delete_nonexistent_iri(session: AsyncSession):
-#     deleted_count = await delete_iri(session, uuid7())
-#     assert deleted_count == 0
+async def test_delete_nonexistent_noid_binding(session: AsyncSession, minter: Minter):
+    success = await delete_noid_binding(session, db_minter=minter, noid='test')
+    assert not success

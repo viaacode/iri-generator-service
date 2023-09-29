@@ -1,3 +1,4 @@
+from sqlalchemy import UniqueConstraint
 from core.config import settings
 from models.base import IdMixin, TimestampMixin
 from sqlmodel import SQLModel
@@ -17,7 +18,10 @@ class MinterBase(SQLModel):
 
 
 class MinterCreate(MinterBase):
-    ...
+    scheme: str = settings.NOID_SCHEME
+    naa: str = settings.NOID_NAA
+    template: str = settings.NOID_TEMPLATE
+    last_n: int = None
 
 
 class MinterUpdate(MinterBase):
@@ -29,6 +33,9 @@ class MinterUpdate(MinterBase):
 
 class Minter(IdMixin, TimestampMixin, MinterBase, table=True):
     __tablename__ = "minters"
+    __table_args__ = (
+        UniqueConstraint("scheme", "naa", "template", name="unique_minter_binding"),
+    )
 
 
 class MinterResponse(Minter, table=False):

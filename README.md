@@ -2,25 +2,60 @@
 
 This application runs a Web service that dispenses NOIDs or IRIs to applications.
 It can create multiple independent minters that are capable to mint and persist NOIDs. Minters can also bind minted NOIDs to a string for later retrieval. 
-The NOID generator uses [noid](https://pypi.org/project/noid/) for minting NOIDs , and PostgreSQL for persisting all minter configurations, the minted noids, and their bindings.
+The NOID generator uses [noid](https://pypi.org/project/noid/) for minting NOIDs, and PostgreSQL for persisting all minter configurations and the minted NOIDs with minimal metadata, such as their bindings.
+
+## Testing and development
+
+This repo uses Docker (Compose) to run the test and development environment. 
+
+### Run the tests
+
+```
+bash scripts/run-tests.sh
+```
+
+### Run the development setup
+
+```
+bash scripts/run-dev.sh
+```
+
+## Configuration
+
+| Variable | Description | Default |
+| APP_HOST | The base URL of the application. | `"0.0.0.0"` |
+| APP_PORT | The port the application is running on | `8000` |
+| POSTGRES_USER | The user of the postgres database. | `"postgres"` |
+| POSTGRES_PASSWORD | The password of the postgres database. | `"postgres"` |
+| POSTGRES_DB | The name of the postgres scheme. | `"postgres"` |
+| POSTGRES_PORT | The port the postgres instance is running on. |`5432` |
+| POSTGRES_ECHO | | `false` |
+| POSTGRES_POOL_SIZE | The size of the postgres connection pool. | `5` |
+| NOID_SCHEME | The default NOID scheme. | `""` |
+| NOID_TEMPLATE | The default template by which to generate NOIDs. See [](https://metacpan.org/dist/Noid/view/noid#TEMPLATES) for more information on how to construct templates. | `"zedededek"` |
+| NOID_NAA | The default name assigning authority (NAA) number. | `""` |
 
 ## API
+
+The API is documented using openapi located at `/docs`.
 
 ### Creating a new minter
 
 You can create a new minter by executing `POST` to `/api/v1/minters/`. 
-The configuration for the minter can be supplied with a JSON payload, like below (these are the default values):
-```
+The configuration for the minter can be supplied with a JSON payload, containing the noid scheme [default: `NOID_SCHEME`], the name assigning authority (NAA) number [default: `NOID_NAA`], and the template by which to generate NOIDs [default: `NOID_TEMPLATE`]. Note that the combination of scheme, naa and template must be unique to prevent different minters minting clashing NOIDs.
+An example payload is given below:
+
+```json
 {
-    "scheme": "",
+    "scheme": "", 
     "naa": "",
     "template": "zedededek",
 }
 ```
+This will return the configuration of the created minter identified by an UUID. 
+For example, the request above could result into something like 
 
-This will return something like 
-
-```
+```json
 {
     "scheme": "",
     "naa": "",
@@ -32,38 +67,97 @@ This will return something like
 }
 ```
 
-The minter is now available at `/api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/`
+The minter is now available at `/api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/`. 
+
+### Creating a URI minter
+
+You can create a minter that generates URIs by setting the scheme of the minter to any URI base. 
+For instance, the following configuration will create a minter that mints NOIDs that look like `https://example.org/0000004t`.
+
+```json
+{
+    "scheme": "https://example.org/", 
+    "template": "zedededek"
+}
+```
+
 
 ### Creating one or more NOIDs
 
 Once you have created a minter, you can use it to mint new noids. 
-To create one or more new NOIDs, run a `POST` to `/api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/noids/` and it will a new NOID every time.
+To create one or more new NOIDs, run a `POST` to `/api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/noids/` and it will mint a new NOID every time.
 For example:
+
+```json
+[
+  {
+    "binding": null,
+    "created_at": "2023-09-29T09:35:44.897002",
+    "updated_at": "2023-09-29T09:35:44.897011",
+    "id": "065169a7-0e5a-72e5-8000-9187bb9dbe19",
+    "noid": "00000000",
+    "n": 0,
+    "minter_id": "065169a6-4f2e-79b2-8000-75d456308644"
+  }
+]
 ```
 
-```
-
-In case you need multiple noids, pass the count parameter in the body:
+In case you need multiple noids, add the `count` query parameter like:
 
 ```
-{
-    count: 3
-}
+POST /api/v1/minters/065169a6-4f2e-79b2-8000-75d456308644/noids/?count=3
 ```
 
-You can retrieve the metadata of this NOID by
+Which will yield
 
 ```
-GET /api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/noids/00
+[
+  {
+    "binding": null,
+    "created_at": "2023-09-29T09:36:13.908365",
+    "updated_at": "2023-09-29T09:36:13.908370",
+    "id": "065169a8-de88-7b34-8000-dd6c6d43c559",
+    "noid": "00000017",
+    "n": 1,
+    "minter_id": "065169a6-4f2e-79b2-8000-75d456308644"
+  },
+  {
+    "binding": null,
+    "created_at": "2023-09-29T09:36:13.908621",
+    "updated_at": "2023-09-29T09:36:13.908623",
+    "id": "065169a8-de89-7ba6-8000-0b00eca1a290",
+    "noid": "0000002e",
+    "n": 2,
+    "minter_id": "065169a6-4f2e-79b2-8000-75d456308644"
+  },
+  {
+    "binding": null,
+    "created_at": "2023-09-29T09:36:13.908780",
+    "updated_at": "2023-09-29T09:36:13.908782",
+    "id": "065169a8-de8a-760b-8000-9b07c733c81b",
+    "noid": "0000003m",
+    "n": 3,
+    "minter_id": "065169a6-4f2e-79b2-8000-75d456308644"
+  }
+]
 ```
 
-### Binding a key to a NOID
+You can retrieve the metadata of a NOID by doing a `GET`:
+
+```
+GET /api/v1/minters/065169a6-4f2e-79b2-8000-75d456308644/noids/0000003m
+```
+
+### Binding a key to a pre-existing NOID
 
 You can also bind any string to a NOID in case you need to reproduce it.
 For example, binding the NOID `00` to `key`
 ```
 PUT /api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/noids/00/binding/key
 ```
+
+Note that the noid, in this case `00`, should be created first by using, for example, `POST` on `/api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/noids/`.
+
 You can retrieve the binding by doing
 
 ```
@@ -88,41 +182,29 @@ You can also unset a binding by doing
 DELETE /api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/noids/00/binding/
 ```
 
+### Binding a key to a new NOID
 
-
-You can also create and bind nodes at the same time. 
+It is also possible to create and bind nodes at the same time. 
+For example:
 
 ```
 POST /api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/bind/
 ```
+
+with payload:
 
 ```
 { bindings: "some-key" }
 ```
 
 Of if you need to create and bind multiple NOIDs at once:
+
 ```
 { bindings: ["some-key","some-other-key"] }
 ```
 
+To retrieve the NOID attached to the binding, use:
 
 ```
 GET /api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/bind/test
-```
-
-
-## Testing and development
-
-This repo uses Docker (Compose) to run the test and development environment. 
-
-### Run the tests
-
-```
-bash scripts/run-tests.sh
-```
-
-### Run the development setup
-
-```
-bash scripts/run-dev.sh
 ```

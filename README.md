@@ -23,6 +23,7 @@ bash scripts/run-dev.sh
 ## Configuration
 
 | Variable | Description | Default |
+| ----- | ----- | --- |
 | APP_HOST | The base URL of the application. | `"0.0.0.0"` |
 | APP_PORT | The port the application is running on | `8000` |
 | POSTGRES_USER | The user of the postgres database. | `"postgres"` |
@@ -110,7 +111,7 @@ POST /api/v1/minters/065169a6-4f2e-79b2-8000-75d456308644/noids/?count=3
 
 Which will yield
 
-```
+```json
 [
   {
     "binding": null,
@@ -144,7 +145,7 @@ Which will yield
 
 You can retrieve the metadata of a NOID by doing a `GET`:
 
-```
+```http
 GET /api/v1/minters/065169a6-4f2e-79b2-8000-75d456308644/noids/0000003m
 ```
 
@@ -193,14 +194,14 @@ POST /api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/bind/
 
 with payload:
 
-```
-{ bindings: "some-key" }
+```json
+{ "bindings": "some-key" }
 ```
 
 Of if you need to create and bind multiple NOIDs at once:
 
-```
-{ bindings: ["some-key","some-other-key"] }
+```json
+{ "bindings": ["some-key","some-other-key"] }
 ```
 
 To retrieve the NOID attached to the binding, use:

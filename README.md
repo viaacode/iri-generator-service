@@ -1,4 +1,4 @@
-# NOID generator service
+# IRI generator service
 
 This application runs a Web service that dispenses NOIDs or IRIs to applications.
 It can create multiple independent minters that are capable to mint and persist NOIDs. Minters can also bind minted NOIDs to a string for later retrieval. 

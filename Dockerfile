@@ -28,7 +28,7 @@ COPY ./app /app
 
 RUN addgroup --system appgroup && adduser --system appuser --ingroup appgroup
 
-RUN chown -R appuser:appgroup /app
+RUN chown -R appuser:appgroup /app &&  chown -R appuser:appgroup /home/appuser/.local/
 
 USER appuser
 

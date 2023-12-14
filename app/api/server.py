@@ -24,7 +24,7 @@ async def on_startup():
     await create_db_and_tables(engine)
 
 
-@app.get("/", tags=["health"])
+@app.get("/health/live", tags=["health"])
 async def health():
     return dict(
         name=settings.PROJECT_NAME,

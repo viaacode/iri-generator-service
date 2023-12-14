@@ -26,4 +26,4 @@ WORKDIR /app
 
 COPY ./app /app
 
-CMD ["uvicorn","api.server:app","--host","0.0.0.0","--port","8080"]
+CMD ["python", "main.py"]

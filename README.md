@@ -24,8 +24,7 @@ bash scripts/run-dev.sh
 
 | Variable | Description | Default |
 | ----- | ----- | --- |
-| APP_HOST | The base URL of the application. | `"0.0.0.0"` |
-| APP_PORT | The port the application is running on | `8000` |
+| POSTGRES_HOST | The host URL of the postgres database. | `"0.0.0.0"` |
 | POSTGRES_USER | The user of the postgres database. | `"postgres"` |
 | POSTGRES_PASSWORD | The password of the postgres database. | `"postgres"` |
 | POSTGRES_DB | The name of the postgres scheme. | `"postgres"` |

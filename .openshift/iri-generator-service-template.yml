@@ -133,9 +133,8 @@ objects:
         app.openshift.io/runtime-version: ${env}
         env: ${env}
     data:
-      APP_HOST: some_value
-      APP_PORT: some_value
       POSTGRES_USER: some_value
+      POSTGRES_HOST: some_value
       POSTGRES_DB: some_value
       POSTGRES_PORT: some_value
       POSTGRES_ECHO: some_value

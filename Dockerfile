@@ -19,6 +19,7 @@ ENV PYTHONUNBUFFERED=1
 COPY --from=builder /root/.local/ /home/appuser/.local/
 
 ENV PATH=/home/appuser/.local/bin:$PATH
+ENV PYTHONPATH=${PYTHONPATH}:/home/appuser/.local/lib/python3.10/site-packages/
 
 EXPOSE 8080
 

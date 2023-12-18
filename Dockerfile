@@ -16,9 +16,10 @@ FROM python:3.10-slim AS production
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED=1
 
-COPY --from=builder /root/.local /root/.local
+COPY --from=builder /root/.local/ /home/appuser/.local/
 
-ENV PATH=/root/.local/bin:$PATH
+ENV PATH=/home/appuser/.local/bin:$PATH
+ENV PYTHONPATH=${PYTHONPATH}:/home/appuser/.local/lib/python3.10/site-packages/
 
 EXPOSE 8080
 
@@ -26,4 +27,11 @@ WORKDIR /app
 
 COPY ./app /app
 
-CMD ["uvicorn","api.server:app","--host","0.0.0.0","--port","8080"]
+RUN addgroup --system appgroup && adduser --system appuser --ingroup appgroup
+
+RUN chown -R appuser:appgroup /app &&  chown -R appuser:appgroup /home/appuser/.local/
+
+USER appuser
+
+CMD ["python", "main.py"]
+

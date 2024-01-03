@@ -24,7 +24,7 @@ async def on_startup():
     await create_db_and_tables(engine)
 
 
-@app.get("/", tags=["health"])
+@app.get("/health/live", tags=["health"])
 async def health():
     return dict(
         name=settings.PROJECT_NAME,
@@ -34,5 +34,6 @@ async def health():
     )
 
 
-# if __name__ == "__main__":
-#     uvicorn.run("main:app", host="0.0.0.0", port=8001)
+""" if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8080)
+ """

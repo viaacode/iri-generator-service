@@ -13,7 +13,7 @@ x-postgres-base: &postgres-base
 
 x-app-base: &app-base
   build:
-    context: ./app
+    context: .
   restart: always
 
 services:
@@ -32,7 +32,7 @@ services:
     <<: *app-base
     command: sh -c "python -m pytest -s -vv --cov=app --cov-report term-missing:skip-covered"
     build:
-      context: ./app
+      context: .
       args:
         ENV: test
     env_file: "./app/.env.local"

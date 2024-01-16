@@ -74,9 +74,9 @@ async def put_binding_route(id: UUID, noid: str, binding:str, db: AsyncSession =
     status_code=status.HTTP_200_OK,
     response_model=Noid,
 )
-async def delete_binding_route(id: UUID, noid: str, binding:str, db: AsyncSession = Depends(get_session)):
+async def delete_binding_route(id: UUID, noid: str, db: AsyncSession = Depends(get_session)):
     db_minter = await get_minter(db, id=id)
-    db_noid = await delete_noid_binding(session=db, db_minter=db_minter,noid=noid, binding=binding)
+    db_noid = await delete_noid_binding(session=db, db_minter=db_minter,noid=noid)
     if db_noid is None:
         raise HTTPException(
             status_code=404,
@@ -90,9 +90,9 @@ async def delete_binding_route(id: UUID, noid: str, binding:str, db: AsyncSessio
     status_code=status.HTTP_200_OK,
     response_model=Noid,
 )
-async def get_binding_route(id: UUID, noid: str, binding:str, db: AsyncSession = Depends(get_session)):
+async def get_binding_route(id: UUID, noid: str, db: AsyncSession = Depends(get_session)):
     db_minter = await get_minter(db, id=id)
-    db_noid = await get_noid_binding(session=db, db_minter=db_minter,noid=noid, binding=binding)
+    db_noid = await get_noid_binding(session=db, db_minter=db_minter,noid=noid)
     if db_noid is None:
         raise HTTPException(
             status_code=404,

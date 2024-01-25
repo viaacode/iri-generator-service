@@ -85,6 +85,7 @@ async def create_and_bind_noids(
 ) -> List[Noid]:
     # 2. mint next noid
     try:
+        # Ensure bindings is an array
         bindings = bindings if isinstance(bindings, list) else [bindings]
         n = db_minter.last_n
         db_noids = []

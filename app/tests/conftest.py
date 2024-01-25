@@ -61,3 +61,8 @@ async def session(engine):
 @pytest_asyncio.fixture()
 async def minter(session):
     return await create_minter(session, MinterCreate(naa="", template="zek", scheme=""))
+
+# TODO:milan
+# @pytest_asyncio.fixture()
+# async def minter(session):
+#     return await create_minter(session, MinterCreate(naa="", template="zek", scheme=""))

@@ -7,6 +7,6 @@ isort
 # testing
 httpx
 pytest
-pytest-asyncio
+pytest-asyncio==0.22
 pytest-timeout
 pytest-cov

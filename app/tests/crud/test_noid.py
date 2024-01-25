@@ -7,6 +7,7 @@ from noid import mint as mint_noid
 
 
 async def test_create_noids(session: AsyncSession, minter: Minter):
+    # Expected object
     noid = NoidCreate(
         noid=mint_noid(
             n=minter.last_n,
@@ -18,7 +19,10 @@ async def test_create_noids(session: AsyncSession, minter: Minter):
         minter_id=minter.id,
         n=minter.last_n
     )
+    # actual
     created_noid, = await create_noids(session, db_minter=minter)
+
+    # compare
     assert created_noid is not None
     assert created_noid.binding == noid.binding
     assert created_noid.noid == noid.noid
@@ -69,16 +73,35 @@ async def test_create_multiple_noids(session: AsyncSession, minter: Minter):
     assert created_noids[1].noid != next_noid.noid
 
 async def test_get_noid(session: AsyncSession, minter: Minter):
+    # Expected
     noid = mint_noid(
             n=minter.last_n,
             template=minter.template,
             scheme=minter.scheme,
             naa=minter.naa,
         )
+    # store
     created_noid, = await create_noids(session, db_minter=minter)
+    # actual
     retrieved_noid = await get_noid(session, minter, created_noid.noid)
     assert retrieved_noid == created_noid
     assert retrieved_noid.noid == noid
+
+# TODO: for milan
+# async def test_get_noid_with_uri(session: AsyncSession, minter: Minter):
+#     # Expected
+#     noid = mint_noid(
+#             n=minter.last_n,
+#             template=minter.template,
+#             scheme=minter.scheme,
+#             naa=minter.naa,
+#         )
+#     # store
+#     created_noid, = await create_noids(session, db_minter=minter)
+#     # actual
+#     retrieved_noid = await get_noid(session, minter, created_noid.noid)
+#     assert retrieved_noid == created_noid
+#     assert retrieved_noid.noid == noid
 
 async def test_mint_new_noid(session: AsyncSession, minter: Minter):
     noid = mint_new_noid(minter, 0)

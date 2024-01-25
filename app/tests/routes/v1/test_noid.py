@@ -38,6 +38,15 @@ class TestNoidRouter(BaseTestRouter):
         assert response.json()["n"] == noid.n
         assert response.json()["minter_id"] == str(minter.id)
 
+    async def test_get_noid_with_uri(self, session, uri_minter, client):
+        noid, = await create_noids(session, uri_minter)
+        response = await client.get(f"/minters/{uri_minter.id}/noids/{noid.noid}")
+        assert response.status_code == 200
+        assert response.json()["noid"] == noid.noid
+        assert response.json()["binding"] == noid.binding
+        assert response.json()["n"] == noid.n
+        assert response.json()["minter_id"] == str(uri_minter.id)
+
     async def test_get_noids(self, session, minter, client):
         noid, = await create_noids(session, minter)
         response = await client.get(f"/minters/{minter.id}/noids/")

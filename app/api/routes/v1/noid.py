@@ -1,3 +1,4 @@
+from urllib.parse import unquote
 from crud.noid import (update_noid_binding, create_noids, delete_noid_binding, get_noid_binding, get_noids, get_noid)
 from crud.minter import get_minter
 from db.session import get_session
@@ -43,6 +44,7 @@ async def get_noids_route(id: UUID, db: AsyncSession = Depends(get_session)):
     response_model=Noid,
 )
 async def get_noid_route(id: UUID, noid: str, db: AsyncSession = Depends(get_session)):
+    noid = unquote(noid)
     db_minter = await get_minter(db, id=id)
     db_noid = await get_noid(db, db_minter=db_minter, noid=noid)
     if db_noid is None:

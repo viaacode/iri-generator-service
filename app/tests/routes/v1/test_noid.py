@@ -1,3 +1,4 @@
+from urllib.parse import quote
 import pytest
 from api.routes.v1.minter import router as minter_router
 from crud.noid import create_noids
@@ -40,7 +41,8 @@ class TestNoidRouter(BaseTestRouter):
 
     async def test_get_noid_with_uri(self, session, uri_minter, client):
         noid, = await create_noids(session, uri_minter)
-        response = await client.get(f"/minters/{uri_minter.id}/noids/{noid.noid}")
+        quote_noid = quote(noid.noid, safe="");
+        response = await client.get(f"/minters/{uri_minter.id}/noids/{quote_noid}")
         assert response.status_code == 200
         assert response.json()["noid"] == noid.noid
         assert response.json()["binding"] == noid.binding

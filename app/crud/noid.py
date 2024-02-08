@@ -6,7 +6,7 @@ from models.noid import Noid
 from noid import mint as mint_noid
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlmodel import delete, select
+from sqlmodel import select
 
 
 def mint_new_noid(db_minter: Minter, n: int, binding: str | None = None) -> Noid:
@@ -58,7 +58,7 @@ async def update_noid_binding(
     session.add(db_noid)
     await session.commit()
     await session.refresh(db_noid)
-    return binding
+    return db_noid
 
 
 async def delete_noid_binding(
@@ -72,7 +72,7 @@ async def delete_noid_binding(
     session.add(db_noid)
     await session.commit()
     await session.refresh(db_noid)
-    return True
+    return db_noid
 
 
 async def get_noid_binding(session: AsyncSession, db_minter: Minter, noid: str) -> str:
@@ -134,5 +134,17 @@ async def get_noid(session: AsyncSession, db_minter: Minter, noid: str) -> Noid:
 
 async def get_noids(session: AsyncSession, db_minter: Minter) -> List[Noid]:
     query = select(Noid).where(Noid.minter_id == db_minter.id)
+    response = await session.execute(query)
+    return response.scalars().all()
+
+
+async def get_noids_by_binding(
+    session: AsyncSession, db_minter: Minter, binding: str
+) -> Noid:
+    query = (
+        select(Noid)
+        .where(Noid.minter_id == db_minter.id)
+        .where(Noid.binding == binding)
+    )
     response = await session.execute(query)
     return response.scalars().all()

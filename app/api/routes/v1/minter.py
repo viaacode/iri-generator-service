@@ -44,7 +44,7 @@ async def get_minter_route(id: UUID, db: AsyncSession = Depends(get_session)):
     minter = await get_minter(session=db, id=id)
     if minter is None:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail="Minter not found",
         )
     return minter

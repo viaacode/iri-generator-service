@@ -148,21 +148,27 @@ You can retrieve the metadata of a NOID by doing a `GET`:
 GET /api/v1/minters/065169a6-4f2e-79b2-8000-75d456308644/noids/0000003m
 ```
 
+To retrieve the NOIDs that match a particular binding:
+
+```
+GET /api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/noids?binding=key
+```
+
 ### Binding a key to a pre-existing NOID
 
 You can also bind any string to a NOID in case you need to reproduce it.
 For example, binding the NOID `00` to `key`
 ```
-PUT /api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/noids/00/binding/key
+PUT /api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/noids/00?binding=key
 ```
 
 Note that the noid, in this case `00`, should be created first by using, for example, `POST` on `/api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/noids/`.
 
-You can retrieve the binding by doing
+<!-- You can retrieve the binding by doing
 
 ```
 GET /api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/noids/00/binding/
-```
+``` -->
 
 To retrieve the same NOID, do
 
@@ -179,8 +185,11 @@ GET /api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/bind/key
 You can also unset a binding by doing
 
 ```
-DELETE /api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/noids/00/binding/
+DELETE /api/v1/minters/065158d0-5899-7d79-8000-eac0bd0a47c1/noids/00?binding
 ```
+
+Note that the API does not allow you to delete or alter NOIDs expect for the binding. 
+PUT or DELETE requests on a `/noids/{noid}` on a will return a `405` if the binding parameter is not supplied.
 
 ### Binding a key to a new NOID
 

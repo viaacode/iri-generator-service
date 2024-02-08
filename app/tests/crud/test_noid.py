@@ -7,6 +7,7 @@ from noid import mint as mint_noid
 
 
 async def test_create_noids(session: AsyncSession, minter: Minter):
+    # Expected object
     noid = NoidCreate(
         noid=mint_noid(
             n=minter.last_n,
@@ -18,7 +19,10 @@ async def test_create_noids(session: AsyncSession, minter: Minter):
         minter_id=minter.id,
         n=minter.last_n
     )
+    # actual
     created_noid, = await create_noids(session, db_minter=minter)
+
+    # compare
     assert created_noid is not None
     assert created_noid.binding == noid.binding
     assert created_noid.noid == noid.noid
@@ -69,14 +73,32 @@ async def test_create_multiple_noids(session: AsyncSession, minter: Minter):
     assert created_noids[1].noid != next_noid.noid
 
 async def test_get_noid(session: AsyncSession, minter: Minter):
+    # Expected
     noid = mint_noid(
             n=minter.last_n,
             template=minter.template,
             scheme=minter.scheme,
             naa=minter.naa,
         )
+    # store
     created_noid, = await create_noids(session, db_minter=minter)
+    # actual
     retrieved_noid = await get_noid(session, minter, created_noid.noid)
+    assert retrieved_noid == created_noid
+    assert retrieved_noid.noid == noid
+
+async def test_get_noid_with_uri(session: AsyncSession, uri_minter: Minter):
+    # Expected
+    noid = mint_noid(
+            n=uri_minter.last_n,
+            template=uri_minter.template,
+            scheme=uri_minter.scheme,
+            naa=uri_minter.naa,
+        )
+    # store
+    created_noid, = await create_noids(session, db_minter=uri_minter)
+    # actual
+    retrieved_noid = await get_noid(session, uri_minter, created_noid.noid)
     assert retrieved_noid == created_noid
     assert retrieved_noid.noid == noid
 
@@ -143,14 +165,14 @@ async def test_get_nonexistent_noid_by_binding(session: AsyncSession, minter: Mi
 
 async def test_update_noid_binding(session: AsyncSession, minter: Minter):
     created_noid, = await create_noids(session, db_minter=minter)
-    binding = await update_noid_binding(session, db_minter=minter, noid=created_noid.noid, binding='test')
-    assert binding == 'test'
-    assert binding == created_noid.binding
+    updated_noid = await update_noid_binding(session, db_minter=minter, noid=created_noid.noid, binding='test')
+    assert updated_noid.binding == 'test'
+    assert updated_noid.binding == created_noid.binding
 
 
 async def test_update_binding_of_nonexistent_noid(session: AsyncSession, minter: Minter):
-    binding = await update_noid_binding(session, db_minter=minter, noid='test', binding='test')
-    assert binding is None
+    updated_noid = await update_noid_binding(session, db_minter=minter, noid='test', binding='test')
+    assert updated_noid is None
 
 
 async def test_delete_noid_binding(session: AsyncSession, minter: Minter):

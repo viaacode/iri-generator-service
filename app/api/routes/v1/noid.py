@@ -63,13 +63,7 @@ async def get_noid_route(id: UUID, noid: str, db: AsyncSession = Depends(get_ses
     status_code=status.HTTP_200_OK,
     response_model=Noid,
 )
-async def put_noid_route(id: UUID, noid: str, binding: str = None, db: AsyncSession = Depends(get_session)):
-    if binding is None:
-        raise HTTPException(
-            status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
-            detail=f"Parameter 'binding' not supplied.",
-        )
-
+async def put_noid_route(id: UUID, noid: str, binding: str, db: AsyncSession = Depends(get_session)):
     db_minter = await get_minter(db, id=id)
     db_noid = await update_noid_binding(session=db, db_minter=db_minter,noid=noid, binding=binding)
     if db_noid is None:
@@ -86,13 +80,7 @@ async def put_noid_route(id: UUID, noid: str, binding: str = None, db: AsyncSess
     status_code=status.HTTP_200_OK,
     response_model=Noid,
 )
-async def delete_binding_route(id: UUID, noid: str, binding: str = None, db: AsyncSession = Depends(get_session)):
-    if binding is None:
-        raise HTTPException(
-            status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
-            detail=f"Parameter 'binding' not supplied.",
-        )
-
+async def delete_binding_route(id: UUID, noid: str, binding: str, db: AsyncSession = Depends(get_session)):
     db_minter = await get_minter(db, id=id)
     db_noid = await delete_noid_binding(session=db, db_minter=db_minter,noid=noid)
     if db_noid is None:
